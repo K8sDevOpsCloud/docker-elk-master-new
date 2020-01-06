@@ -1,0 +1,52 @@
+input 
+{
+	file {
+		path => "/tmp/logs/web.log"
+		type => "logs"
+		start_position => "beginning"
+	}
+	
+}
+
+filter
+{
+	grok{
+		match => {
+			"message" => "%{COMBINEDAPACHELOG}"
+		}
+	}
+	mutate{
+		convert => { "bytes" => "integer" }
+	}
+	date {
+		match => [ "timestamp", "dd/MMM/YYYY:HH:mm:ss Z" ]
+		locale => en
+		remove_field => "timestamp"
+	}
+	geoip {
+		source => "clientip"
+	}
+	useragent {
+		source => "agent"
+		target => "useragent"
+	}
+}
+
+
+output
+{
+	stdout {
+		codec => dots
+	}
+
+ 	elasticsearch {
+                       hosts => "elasticsearch:9200"
+                       user => "elastic"
+                       password => "TnYp9tRXr9oFnbwhXSim"
+
+
+  	}
+
+}
+
+
